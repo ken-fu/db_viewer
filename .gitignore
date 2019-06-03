@@ -4,3 +4,4 @@ workspace/*
 !.gitkeep
 database/*
 !.gitkeep
+*tag_config.ini
