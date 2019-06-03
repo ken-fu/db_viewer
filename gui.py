@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pyperclip
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QTreeView, QComboBox, QTextEdit, QLineEdit, QAbstractItemView, QCheckBox, QDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QTreeView, QComboBox, QTextEdit, QLineEdit, QAbstractItemView, QCheckBox, QDialog, QProgressBar, QMessageBox
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import QAbstractTableModel
 import sqlite3
@@ -185,6 +185,7 @@ class MainWidget(QWidget):
 
         self.B_output = QPushButton("Output",self)
         self.B_output.move(220,10)
+        self.B_output.clicked.connect(self.create_output_sub_win)
 
         self.B_TagEdit = QPushButton("Tag Edit",self)
         self.B_TagEdit.move(320,10)
@@ -246,6 +247,7 @@ class MainWidget(QWidget):
         self.B_comment = QPushButton("Comment",self)
         self.B_comment.move(450,660)
         self.comment_data = ''
+        self.B_comment.clicked.connect(self.create_comment_sub_win)
 
         self.B_trans = QPushButton("En -> Jp",self)
         self.B_trans.move(550,400)
@@ -323,7 +325,18 @@ class MainWidget(QWidget):
         self.TB_PD.setText(temp_data[8])
         if(temp_data[1].zfill(2) != '00'):
             self.TB_Tag.setText(self.conf_parser['Tag'][temp_data[1].zfill(2)])
+        self.comment_data = temp_data[9]
     
+    def reset_text(self):
+        self.TB_title.clear()
+        self.TB_abst.clear()
+        self.TB_FA.clear()
+        self.TB_RG.clear()
+        self.TB_doi.clear()
+        self.TB_PD.clear()
+        self.TB_Tag.clear()
+        self.comment_data = ''
+
     def title_translate(self,event):
         title_text = self.TB_title.toPlainText()
         title_jp = translate.translater(title_text)
@@ -408,6 +421,19 @@ class MainWidget(QWidget):
         self.CB_Tag.addItems(self.Tag_list)
         self.CB_TFilter.clear()
         self.CB_TFilter.addItems(self.Tag_list)
+    
+    def create_output_sub_win(self):
+        self.Out_SW = OutputSubWin(self.paper_view_list,self)
+        self.Out_SW.show()
+    
+    def create_comment_sub_win(self):
+        temp_article = self.CB_article.currentText()
+        temp_doi = self.TB_doi.text()
+        self.Comment_SW = CommentSubWin(temp_article,self.comment_data,temp_doi,self)
+        self.Comment_SW.show()
+        self.import_database(temp_article)
+        self.set_tree()
+        self.reset_text()
 
 class TagEditSubWin(QDialog):
     def __init__(self, parent=None):
@@ -490,6 +516,97 @@ class TagEditSubWin(QDialog):
         self.TB_rename_tag.setText(temp_data[1])
         
 
+    def show(self):
+        self.exec_()
+
+class CommentSubWin(QDialog):
+    def __init__(self, article, comment, doi, parent=None):
+        QDialog.__init__(self, parent)
+        self.resize(380,300)
+        self.article = article
+        self.comment = comment
+        self.doi = doi
+        self.create_widgets()
+        
+    def create_widgets(self):
+        self.TB_comment = QTextEdit(self)
+        self.TB_comment.resize(340,240)
+        self.TB_comment.move(20,5)
+        self.TB_comment.setText(self.comment)
+        self.B_comment = QPushButton('Save and close window', self)
+        self.B_comment.move(20,250)
+        self.B_comment.clicked.connect(self.comment_save)
+    
+    def comment_save(self):
+        self.SQL_M = SqlManager(self.article+'.db')
+        self.SQL_M.write_comment_data(self.TB_comment.toPlainText(), self.doi)
+        self.close()
+    
+    def show(self):
+        self.exec_()
+
+class OutputSubWin(QDialog):
+    def __init__(self,paper_view_list, parent=None):
+        QDialog.__init__(self, parent)
+        self.resize(400,300)
+        self.paper_view_list = paper_view_list
+        self.create_widgets()
+        
+    
+    def create_widgets(self):
+        
+
+        self.ChB_title = QCheckBox("Title", self)
+        self.ChB_title.move(50,25)
+        self.ChB_FA = QCheckBox("First Auther", self)
+        self.ChB_FA.move(50,50)
+        self.ChB_RG = QCheckBox("Research Group", self)
+        self.ChB_RG.move(50,75)
+        self.ChB_doi = QCheckBox("DOI", self)
+        self.ChB_doi.move(50,100)
+        self.ChB_PD = QCheckBox("Publish Date", self)
+        self.ChB_PD.move(50,125)
+        self.ChB_abst = QCheckBox("Abstract", self)
+        self.ChB_abst.move(50,150)
+        self.ChB_comment = QCheckBox("Comment", self)
+        self.ChB_comment.move(50,175)
+
+        self.CB_output_mode = QComboBox(self)
+        self.CB_output_mode.addItems(["csv","pdf"])
+        self.CB_output_mode.move(50,200)
+
+        self.B_search = QPushButton('Go',self)
+        self.B_search.move(250,200)
+        self.B_search.clicked.connect(self.output_paper_data)
+
+        self.PB_progress = [0,len(self.paper_view_list)]
+        self.PB_out = QProgressBar(self)
+        self.PB_out.move(250,230)
+
+
+    def output_paper_data(self,event):
+        ValTitle = (self.ChB_title.checkState() == Qt.Checked)
+        ValFA = (self.ChB_FA.checkState() == Qt.Checked)
+        ValRG = (self.ChB_RG.checkState() == Qt.Checked)
+        Valdoi = (self.ChB_doi.checkState() == Qt.Checked)
+        ValPD = (self.ChB_PD.checkState() == Qt.Checked)
+        Valabst = (self.ChB_abst.checkState() == Qt.Checked)
+        Valcomment = (self.ChB_comment.checkState() == Qt.Checked)
+
+        OfG = Output_for_GUI()
+        if(self.CB_output_mode.currentText() == 'csv'):
+            OfG.output_to_csv(self.paper_view_list, [False, False, False, ValTitle, Valabst
+            , ValFA, ValRG, Valdoi, ValPD, Valcomment], self.PB_out, self.PB_progress)
+            self.MB = QMessageBox.information(self,"","Finish !!!",QMessageBox.Close)
+            if self.MB:
+                self.close()
+        else:
+            OfG.output_to_pdf(self.paper_view_list, [False, False, False, ValTitle, Valabst
+            , ValFA, ValRG, Valdoi, ValPD, Valcomment], self.PB_out, self.PB_progress)
+            self.MB = QMessageBox.information(self,"","Finish !!!",QMessageBox.Close)
+            if self.MB:
+                self.close()
+    
     def show(self):
         self.exec_()
 

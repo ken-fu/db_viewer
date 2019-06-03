@@ -7,6 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from tqdm import tqdm
 import datetime
+import time
 
 from translate import translater
 
@@ -72,30 +73,32 @@ class Output:
 
 class Output_for_GUI:
     '''output data prosess class for gui.py'''
-    def output_to_csv(self, data_list, flag, PB, PB_progress):
+    def output_to_csv(self, data_list, flag,PB , PB_progress):
         '''(data_list, flag, PB, PB_progress) ex) flag = [True, False, False, ...]　Output an item which value is True. PB is ProgressBar widget. PB_progress is value of ProgressBar'''
         output_file = open('./workspace/output_%s.csv'%(datetime.datetime.today().date()), 'w', encoding="utf_8_sig")
-        col_name = ['tltle', 'abstract', 'first auther', 'research group', 'doi', 'p_date', 'i_date', 'tag', 'flag']
+        col_name = ['i_date', 'tag', 'com_flag', 'tltle', 'abstract', 'first auther', 'research group', 'doi', 'p_date','comment']
         result = ''
-        for col in range(9):
+        for col in range(10):
             if flag[col]:
                 result += col_name[col]
                 result += ','
         result += '\n'
         for row in data_list:
-            for col in range(9):
+            for col in range(10):
                 if flag[col]:
                     result += row[col].replace(',','_')
                     result += ','
             result += '\n'
-            PB_progress += 1
-            PB.configure(value=PB_progress)
+            PB_progress[0] += 1.0
+            PB.setValue(PB_progress[0]/PB_progress[1]*100)
+            
+
         output_file.write(result)
         output_file.close()
     
-    def output_to_pdf(self, data_list, flag, PB, PB_progress):
+    def output_to_pdf(self, data_list, flag,PB, PB_progress):
         '''(data_list, flag, PB, PB_progress) ex) flag = [True, False, False, ...]　Output an item which value is True. PB is ProgressBar widget. PB_progress is value of ProgressBar'''
-        col_name = ['tltle', 'abstract', 'first auther', 'research group', 'doi', 'p_date', 'i_date', 'tag', 'flag']
+        col_name = ['i_date', 'tag', 'com_flag', 'tltle', 'abstract', 'first auther', 'research group', 'doi', 'p_date','comment']
         # config for pdf
         pdfmetrics.registerFont(UnicodeCIDFont("HeiseiKakuGo-W5"))
         styles = getSampleStyleSheet()
@@ -109,7 +112,6 @@ class Output_for_GUI:
         my_style.rightIndent = 0
         my_style.wordWrap = 'CJK'
         style = my_style
-        PB_progress2 = 0
 
         output_filepath = './workspace/output_%s.pdf'%(datetime.datetime.today().date())
         doc = SimpleDocTemplate(output_filepath, leftMargin=0.5*inch,
@@ -118,12 +120,12 @@ class Output_for_GUI:
 
         # Output processing. Page break for each paper
         for row in data_list:
-            for col in range(9):
+            for col in range(10):
                 if flag[col]:
                     story.append(Paragraph(col_name[col] + ' : ' + row[col], style))
                     story.append(Spacer(1, .25*inch))
             story.append(PageBreak())
-            PB_progress2 += 1
-            PB.configure(value=PB_progress2)
+            PB_progress[0] += 1.0
+            PB.setValue(PB_progress[0]/PB_progress[1]*100)
 
         doc.build(story)
