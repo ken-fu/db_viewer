@@ -9,7 +9,7 @@ from tqdm import tqdm
 import datetime
 import time
 
-from translate import translater
+from file_manager.translate import translater
 
 
 class Output:
@@ -43,7 +43,7 @@ class Output:
         my_style.wordWrap = 'CJK'
         style = my_style
 
-        output_filepath = "./workspace/%s_%s.pdf" % (article_name, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+        output_filepath = "./%s_%s.pdf" % (article_name, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         doc = SimpleDocTemplate(output_filepath, leftMargin=0.5*inch,
                                 rightMargin=0.5*inch, topMargin=0.5*inch, bottomMargin=0.5*inch)
         story = []
@@ -75,7 +75,7 @@ class Output_for_GUI:
     '''output data prosess class for gui.py'''
     def output_to_csv(self, data_list, flag,PB , PB_progress):
         '''(data_list, flag, PB, PB_progress) ex) flag = [True, False, False, ...]　Output an item which value is True. PB is ProgressBar widget. PB_progress is value of ProgressBar'''
-        output_file = open('./workspace/output_%s.csv'%(datetime.datetime.today().date()), 'w', encoding="utf_8_sig")
+        output_file = open('./output_%s.csv'%(datetime.datetime.today().date()), 'w', encoding="utf_8_sig")
         col_name = ['i_date', 'tag', 'com_flag', 'tltle', 'abstract', 'first auther', 'research group', 'doi', 'p_date','comment']
         result = ''
         for col in range(10):
@@ -113,7 +113,7 @@ class Output_for_GUI:
         my_style.wordWrap = 'CJK'
         style = my_style
 
-        output_filepath = './workspace/output_%s.pdf'%(datetime.datetime.today().date())
+        output_filepath = './output_%s.pdf'%(datetime.datetime.today().date())
         doc = SimpleDocTemplate(output_filepath, leftMargin=0.5*inch,
                                 rightMargin=0.5*inch, topMargin=0.5*inch, bottomMargin=0.5*inch)
         story = []

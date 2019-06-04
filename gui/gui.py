@@ -6,15 +6,16 @@ from PyQt5.Qt import Qt
 from PyQt5.QtCore import QAbstractTableModel
 import sqlite3
 import importlib
-from sql_manager import SqlManager
 import threading
 import re
 import configparser
 
-import translate
-from output import Output_for_GUI
-from folder_check import get_all_database
-from ini_sorter import ini_sorter
+from file_manager.sql_manager import SqlManager
+from file_manager.translate import translater
+from file_manager.output import Output_for_GUI
+from file_manager.folder_check import get_all_database
+from file_manager.ini_sorter import ini_sorter
+
 
 class MyTableModel(QAbstractTableModel):
     def __init__(self, list, headers = [], parent = None):
@@ -275,18 +276,18 @@ class MainWidget(QWidget):
     def import_tag(self):
         while True:
             try:
-                file = open('tag_config.ini', 'r')
+                file = open('config/tag_config.ini', 'r')
                 file.close()
                 break
             except FileNotFoundError:
-                file = open('tag_config.ini', 'a+')
+                file = open('config/tag_config.ini', 'a+')
                 file.write('[Tag]\n')
                 file.write('00 = Tag\n')
                 file.close()
                 break
             
         self.conf_parser = configparser.ConfigParser()
-        self.conf_parser.read('tag_config.ini')
+        self.conf_parser.read('config/tag_config.ini')
         self.item_list = list(self.conf_parser['Tag'])
         self.Tag_list = []
         for item in self.item_list:
@@ -339,12 +340,12 @@ class MainWidget(QWidget):
 
     def title_translate(self,event):
         title_text = self.TB_title.toPlainText()
-        title_jp = translate.translater(title_text)
+        title_jp = translater(title_text)
         self.TB_title.setText(title_jp)
 
     def abst_translate(self,event):
         abst_text = self.TB_abst.toPlainText()
-        abst_jp = translate.translater(abst_text)
+        abst_jp = translater(abst_text)
         self.TB_abst.setText(abst_jp)
     
     def doi_copy(self,event):
@@ -464,7 +465,7 @@ class TagEditSubWin(QDialog):
 
     def import_tag(self):
         self.conf_parser = configparser.ConfigParser()
-        self.conf_parser.read('tag_config.ini')
+        self.conf_parser.read('config/tag_config.ini')
         self.item_list = list(self.conf_parser['Tag'])
         self.Tag_list = []
         for item in self.item_list:
@@ -474,7 +475,7 @@ class TagEditSubWin(QDialog):
         for num in range(1,100):
             if(str(num).zfill(2) not in self.item_list):
                 self.conf_parser.set('Tag',str(num).zfill(2),'')
-                self.conf_parser.write(open('tag_config.ini','w'))
+                self.conf_parser.write(open('config/tag_config.ini','w'))
                 ini_sorter()
                 break
         self.import_tag()
@@ -484,7 +485,7 @@ class TagEditSubWin(QDialog):
         self.tag_num = re.sub('\s','', self.TB_rename_tag_num.text())
         self.tag_name = re.sub('\s','', self.TB_rename_tag.text())
         self.conf_parser.set('Tag',self.tag_num,self.tag_name)
-        self.conf_parser.write(open('tag_config.ini','w'))
+        self.conf_parser.write(open('config/tag_config.ini','w'))
 
         self.import_tag()
         self.set_sub_tree()
@@ -492,7 +493,7 @@ class TagEditSubWin(QDialog):
     def del_tag(self, event):
         self.tag_num = re.sub('\s','', self.TB_rename_tag_num.text())
         self.conf_parser.remove_option('Tag',self.tag_num)
-        self.conf_parser.write(open('tag_config.ini','w'))
+        self.conf_parser.write(open('config/tag_config.ini','w'))
 
         self.import_tag()
         self.set_sub_tree()
@@ -610,8 +611,8 @@ class OutputSubWin(QDialog):
     def show(self):
         self.exec_()
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    app = QApplication(sys.argv)
-    mw = MainWidget()    
-    sys.exit(app.exec_())
+#     app = QApplication(sys.argv)
+#     mw = MainWidget()    
+#     sys.exit(app.exec_())
