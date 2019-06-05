@@ -1,8 +1,9 @@
-from gui import gui
+# -*- coding: utf-8 -*-
 import sys
 from PyQt5.QtWidgets import QApplication
-if __name__ == '__main__':
+from gui import gui
 
-    app = QApplication(sys.argv)
-    mw = gui.MainWidget()    
-    sys.exit(app.exec_())
+if __name__ == '__main__':
+    main_app = QApplication(sys.argv)
+    main_window = gui.MainWidget()    
+    sys.exit(main_app.exec_())
