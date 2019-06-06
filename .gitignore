@@ -4,4 +4,6 @@ database/*
 !.gitkeep
 log/*
 !.gitkeep
+config/*
+!.gitkeep
 *tag_config.ini

@@ -14,7 +14,7 @@ However, please be careful that scraping does not violate the terms and conditio
 python 3.6.2  
 reportlab==3.4.0  
 tqdm==4.24.0  
-pyperclip==1.7.0
+pyperclip==1.7.0  
 PyQt==5.12.2
 
 ## Usage
