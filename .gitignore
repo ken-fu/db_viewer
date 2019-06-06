@@ -1,7 +1,7 @@
 *.DS_Store
 *__pycache__
-workspace/*
-!.gitkeep
 database/*
+!.gitkeep
+log/*
 !.gitkeep
 *tag_config.ini
