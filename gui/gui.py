@@ -6,7 +6,7 @@ import configparser
 import pyperclip
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QComboBox, QTextEdit
-from PyQt5.QtWidgets import QLineEdit, QAbstractItemView, QCheckBox
+from PyQt5.QtWidgets import QLineEdit, QAbstractItemView, QCheckBox, QMessageBox
 from PyQt5.Qt import Qt
 
 
@@ -32,6 +32,7 @@ class MainWidget(QWidget):
         self.create_tree()
         self.create_filter_widgets()
         self.create_widgets()
+        self.paper_list = []
 
         self.headers = ["Add Date", "T", "C", "Title"]
         self.show()
@@ -197,6 +198,10 @@ class MainWidget(QWidget):
     # paper_view_list is for display and is rewritten by filtering
     def set_tree(self):
         '''initialization main tree'''
+        if(self.paper_view_list==[]):
+            self.message_box = QMessageBox.information(
+                self, "", "No data found", QMessageBox.Close)
+            self.paper_view_list = self.paper_list[:]
         self.model = MyTableModel(self.paper_view_list, self.headers)
         self.main_tree.setModel(self.model)
         self.main_tree.setColumnWidth(0, 90)
@@ -391,3 +396,4 @@ class MainWidget(QWidget):
         self.import_database(temp_article)
         self.set_tree()
         self.reset_text()
+        self.filter_check()
