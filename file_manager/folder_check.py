@@ -9,6 +9,7 @@ def get_all_database():
     for filepath in filepaths:
         module_name = os.path.splitext(os.path.basename(filepath))[0]
         databases.append(module_name)
+    databases.sort()
     return databases
 
 def get_all_addon():
@@ -17,4 +18,5 @@ def get_all_addon():
     for filepath in filepaths:
         module_name = os.path.splitext(os.path.basename(filepath))[0]
         functions.append(module_name)
+    functions.sort()
     return functions
